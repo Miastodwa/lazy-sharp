@@ -1,0 +1,7 @@
+functions/node_modules
+functions/etc
+functions/lib
+functions/cloud-functions-emulator.log
+functions/firebase-debug.log
+cloud-functions-emulator.log
+yarn-error.log
