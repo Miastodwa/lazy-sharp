@@ -1,4 +1,4 @@
-type SharpGravity = 'north' | 'northeast' | 'east' | 'southeast' | 'south' | 'southwest' | 'west' | 'northwest' | 'center'
+type SharpGravity = 'north' | 'northeast' | 'east' | 'southeast' | 'south' | 'southwest' | 'west' | 'northwest' | 'center' | number
 type SharpStrategy = 'entropy' | 'attention'
 type ResizeLimit = 'min' | 'max'
 type SharpFormat = 'jpeg' | 'png' | 'webp'
@@ -16,6 +16,6 @@ export interface TransformParams {
 	bucket: string
 	folder: string
 	name: string
-	result?: TransformResult
+	result: TransformResult
 	sharp?: SharpParams
 }
