@@ -35,10 +35,15 @@ export function getParams(q: any ): TransformParams {
         bucket: q.bucket,
         folder: parseFolder(),
         name: q.name,
-        result: q.result || 'url',
+        result: q.result || 'redirect',
         sharp: sharpParams
     }
     return params
+}
+
+export function replaceExt(name, ext){
+    const pos = name.lastIndexOf('.')
+    return name.substr(0, pos < 0 ? name.length : pos) + '.' + ext
 }
 
 export function buidlPipeline( p: SharpParams ) {
