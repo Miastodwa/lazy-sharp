@@ -51,7 +51,8 @@ export function buidlPipeline( p: SharpParams ) {
     if (p.resize) pipeline.resize( p.resize[0], p.resize[1] )[p.resizeLimit]()
     if (p.crop) pipeline.crop(p.crop)
     if (p.embed) pipeline.embed()
-    return pipeline.toFormat(p.toFormat)
+    pipeline.toFormat(p.toFormat)
+    return pipeline.on('error', (err) => console.log(err))
 }
 
 export function buildPrefix(p: SharpParams): string {
