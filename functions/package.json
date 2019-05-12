@@ -1,9 +1,12 @@
 {
+  "engines": {
+    "node": "8"
+  },
   "name": "functions",
   "scripts": {
     "lint": "tslint --project tsconfig.json",
     "build": "tsc",
-    "serve": "npm run build && firebase serve --only functions",
+    "serve": "npm run build && firebase serve --only functions --port 5050",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
@@ -11,16 +14,17 @@
   },
   "main": "lib/index.js",
   "dependencies": {
-    "@google-cloud/storage": "^1.7.0",
-    "@types/sharp": "^0.17.9",
+    "@google-cloud/storage": "^2.5.0",
+    "@types/sharp": "^0.22.1",
     "cors": "^2.8.4",
-    "firebase-admin": "^6.1.0",
-    "firebase-functions": "^2.1.0",
-    "sharp": "^0.20.5"
+    "firebase-admin": "^7.3.0",
+    "firebase-functions": "^2.3.1",
+    "sharp": "^0.22.1"
   },
   "devDependencies": {
-    "tslint": "^5.8.0",
-    "typescript": "^2.5.3"
+    "firebase-functions-test": "^0.1.6",
+    "tslint": "^5.16.0",
+    "typescript": "^3.4.5"
   },
   "private": true
 }
