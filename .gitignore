@@ -5,3 +5,4 @@ functions/cloud-functions-emulator.log
 functions/firebase-debug.log
 cloud-functions-emulator.log
 yarn-error.log
+service_account.json

@@ -1,65 +1,36 @@
-import { TransformParams, SharpParams } from './types'
 import * as sharp from 'sharp'
 
-const baseFirebaseLink = 'https://firebasestorage.googleapis.com/v0/'
-const baseMedialink = 'https://www.googleapis.com/download/storage/v1/'
-
-export function fileUrl(meta: any){
-    return meta.mediaLink.replace(baseMedialink, baseFirebaseLink)
+export function replaceExt(filename, ext) {
+    const pos = filename.lastIndexOf('.')
+    return filename.substr(0, pos < 0 ? filename.length : pos) + '.' + ext
 }
 
-export function getParams(q: any ): TransformParams {
-
-    function parseResize(): number[] {
-        const vals = []
-        if (q.width) vals.push(parseInt(q.width))
-        if (q.height) vals.push(parseInt(q.height))
-        return vals
-    }
-
-    function parseFolder(): string {
-        if (!q.folder) return ''
-        if (q.folder.endsWith('/')) return q.folder
-        else return q.folder + '/'
-    }
-
-    const sharpParams: SharpParams = {
-        resize: parseResize(),
-        resizeLimit: q.resizeLimit || 'max',
-        crop: q.crop || false,
-        embed: q.crop ? false : q.embed || false,
-        toFormat: q.toFormat || 'webp'
-    }
-
-    const params: TransformParams = {
-        bucket: q.bucket,
-        folder: parseFolder(),
-        name: q.name,
-        result: q.result || 'redirect',
-        sharp: sharpParams
-    }
-    return params
+export function parseFolder(folder: string): string {
+    if (!folder) return ''
+    if (folder.endsWith('/')) return folder
+    else return folder + '/'
 }
 
-export function replaceExt(name, ext){
-    const pos = name.lastIndexOf('.')
-    return name.substr(0, pos < 0 ? name.length : pos) + '.' + ext
+export function buildPrefix(options: sharp.ResizeOptions): string {
+	return Object.keys(options).reduce(
+		(acc, key) => {
+			if (!options[key]) return acc
+			if (!acc) return `${key}:${options[key]}`
+			return `${acc},${key}:${options[key]}`
+		}, null
+	)
 }
 
-export function buidlPipeline( p: SharpParams ) {
-    const pipeline = sharp()
-    if (p.resize) pipeline.resize( p.resize[0], p.resize[1] )[p.resizeLimit]()
-    if (p.crop) pipeline.crop(p.crop)
-    if (p.embed) pipeline.embed()
-    pipeline.toFormat(p.toFormat)
-    return pipeline.on('error', (err) => console.log(err))
-}
+export async function buidlPipeline(
+    options: sharp.ResizeOptions,
+    format: string | sharp.AvailableFormatInfo
+) {
+    const { width, height } = options
 
-export function buildPrefix(p: SharpParams): string {
-    if (!p) return null
-    const params = []
-    if (p.resize.length) params.push(`resize:${p.resize.join(',')}`)
-    if (p.crop) params.push(`crop:${p.crop}`)
-    if (p.embed) params.push(`embed:${p.embed}`)
-    return params.length ? params.join('|') + '__' : null
+	try {
+		return await sharp().resize( width, height, options).toFormat(format)
+	} catch (error) {
+		console.log(error)
+		throw error
+	}
 }
