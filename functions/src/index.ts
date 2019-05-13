@@ -31,6 +31,7 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 		if (!query.ref) res.status(422).send('ref required')
 
 		const [name, ext] = splitFileName(query.ref)
+		const originalFormat = ext === 'jpg' ? 'jpeg' : ext
 
 		const resizeOptions: sharp.ResizeOptions = {
 			width: +query.width || null,
@@ -48,7 +49,7 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 			cacheControl: query.cacheControl
 		}
 		const sufix = buildSufix(resizeOptions)
-		const sufixedName = `${name}__${sufix}.${params.format}`
+		const sufixedName = `${name}__${sufix}__.${params.format}`
 
 		const storage = admin.storage()
 		const bucket = storage.bucket(params.bucket)
@@ -56,7 +57,7 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 		const modified = bucket.file(sufixedName)
 
 		// if no requested transforms, redirect to original.
-		if (!sufix && ext === params.format) {
+		if (!sufix && originalFormat === params.format) {
 			const url = await original
 				.getSignedUrl(CONFIG)
 				.catch(e => res.status(500).send(e.message))
