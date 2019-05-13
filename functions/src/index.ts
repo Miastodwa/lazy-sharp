@@ -6,7 +6,6 @@ import {
 	splitFileName,
 	parseFolder,
 	buidlPipeline,
-	waited
 } from './utils'
 import { CreateWriteStreamOptions, GetSignedUrlConfig } from '@google-cloud/storage'
 import * as sharp from 'sharp'
@@ -32,8 +31,6 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 	if (req.method !== 'GET') return res.status(405).send('Method Not Allowed')
 
 	return cors(req, res, async () => {
-
-		const t = Date.now() // timing helper
 
 		const {query} = req
 
