@@ -5,12 +5,6 @@ export function splitFileName(filename: string) {
 	return [ filename.slice(0, -ext[0].length), ext[1] ]
 }
 
-export function parseFolder(folder: string): string {
-    if (!folder) return ''
-    if (folder.endsWith('/')) return folder
-    return folder + '/'
-}
-
 export function buildSufix(options: sharp.ResizeOptions): string {
 	return Object.keys(options).reduce(
 		(acc, key) => {
