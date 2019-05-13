@@ -63,34 +63,33 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 		const original = bucket.file(params.folder + params.name)
 		const modified = bucket.file(params.folder + prefix + '__' + modifiedName)
 
-		console.log(waited(t), 'start')
 		// if no requested transforms, redirect to original.
 		if (!prefix && modifiedName === params.name) {
 			const url = await original
 				.getSignedUrl(CONFIG)
 				.catch(e => res.status(500).send(e.message))
 			
-			console.log(waited(t), 'original')
+			console.log('original')
 			if (params.result === 'url') res.send(url[0])
 			else res.redirect(301, url[0])
 			return
 		}
 
 		// if modified exists, redirect to it.
-		console.log(waited(t), 'checking modified')
+		console.log('checking modified...')
 		const [[modifiedExists], [modifiedUrl]] = await Promise.all([
 			modified.exists(),
 			modified.getSignedUrl(CONFIG)
 		])
 		if (modifiedExists) {
-			console.log(waited(t), 'modified exists')
+			console.log('...modified exists')
 			if (params.result === 'url') res.send(modifiedUrl)
 			else res.redirect(301, modifiedUrl)
 			return
 		}
 
 		// if original exists, and modified doesn't, create it, and redirect to it
-		console.log(waited(t), 'creating file...')
+		console.log('creating file...')
 
 		const modifiedMeta: CreateWriteStreamOptions = {
 			public: true,
@@ -113,7 +112,7 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 		)
 		await promiseUpload
 
-		console.log(waited(t), '...file created')
+		console.log('...file created')
 		if (params.result === 'url') res.send( modifiedUrl )
 		else res.redirect(301, modifiedUrl)
 		return
