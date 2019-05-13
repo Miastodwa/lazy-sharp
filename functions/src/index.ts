@@ -16,10 +16,11 @@ const CONFIG: GetSignedUrlConfig = {
 	expires: '01-01-2100'
 }
 
+const { service } = functions.config()
+const creds = service ? { credential: admin.credential.cert(service) } : {}
+
 admin.initializeApp({
-	credential: admin.credential.cert(
-		'/Users/franz/Sites/SERVERLESS/lazy-sharp/service_account.json'
-	),
+	...creds
 })
 
 export const lazysharp = functions.https.onRequest((req, res) => {
