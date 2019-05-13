@@ -29,9 +29,13 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 
 	return cors(req, res, async () => {
 
-		const {query} = req
+		const { query } = req
 
-		const [name, ext] = splitFileName(query.name)
+		// check for required params
+		if (!query.bucket) res.status(422).send('bucket required')
+		if (!query.filename) res.status(422).send('filename required')
+
+		const [name, ext] = splitFileName(query.filename)
 
 		const resizeOptions: sharp.ResizeOptions = {
 			width: +query.width || null,
@@ -44,9 +48,10 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 		const params = {
 			bucket: query.bucket,
 			folder: parseFolder(query.folder),
-			name: query.name,
+			filename: query.filename,
 			result: query.result || 'redirect',
 			format: query.format || ext,
+			cacheControl: query.cacheControl,
 			resizeOptions: resizeOptions
 		}
 		const sufix = buildSufix(resizeOptions)
@@ -54,7 +59,7 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 
 		const storage = admin.storage()
 		const bucket = storage.bucket(params.bucket)
-		const original = bucket.file(params.folder + params.name)
+		const original = bucket.file(params.folder + params.filename)
 		const modified = bucket.file(params.folder + sufixedName)
 
 		// if no requested transforms, redirect to original.
@@ -92,10 +97,9 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 				contentType: formats.includes(format)
 					? `image/${format}`
 					: 'image/jpeg',
-				cacheControl: 'public, max-age=31536000'
+				cacheControl: params.cacheControl || 'public, max-age=31536000'
 			}
 		}
-
 		const pipeline = await buidlPipeline(resizeOptions, params.format)
 			.catch( e => res.status(422).send(e.message))
 		if (!pipeline) return
