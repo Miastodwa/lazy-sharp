@@ -1,14 +1,14 @@
 import * as sharp from 'sharp'
 
-export function replaceExt(filename, ext) {
-    const pos = filename.lastIndexOf('.')
-    return filename.substr(0, pos < 0 ? filename.length : pos) + '.' + ext
+export function splitFileName(filename: string) {
+	const ext = /(?:\.([^.]+))?$/.exec(filename)
+	return [ filename.slice(0, -ext[0].length), ext[1] ]
 }
 
 export function parseFolder(folder: string): string {
     if (!folder) return ''
     if (folder.endsWith('/')) return folder
-    else return folder + '/'
+    return folder + '/'
 }
 
 export function buildPrefix(options: sharp.ResizeOptions): string {
@@ -33,4 +33,8 @@ export async function buidlPipeline(
 		console.log(error)
 		throw error
 	}
+}
+
+export function waited(t) {
+	return (Date.now() - t) / 1000
 }
