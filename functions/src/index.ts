@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import * as Cors from 'cors'
 import {
-	buildPrefix,
+	buildSufix,
 	splitFileName,
 	parseFolder,
 	buidlPipeline,
@@ -11,7 +11,6 @@ import { CreateWriteStreamOptions, GetSignedUrlConfig } from '@google-cloud/stor
 import * as sharp from 'sharp'
 
 const cors = Cors({ origin: true })
-const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG)
 const CONFIG: GetSignedUrlConfig = {
 	action: 'read',
 	expires: '01-01-2100'
@@ -21,9 +20,6 @@ admin.initializeApp({
 	credential: admin.credential.cert(
 		'/Users/franz/Sites/SERVERLESS/lazy-sharp/service_account.json'
 	),
-	databaseURL: firebaseConfig.databaseURL,
-	storageBucket: firebaseConfig.storageBucket,
-	projectId: firebaseConfig.projectId
 })
 
 export const lazysharp = functions.https.onRequest((req, res) => {
@@ -52,16 +48,16 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 			format: query.format || ext,
 			resizeOptions: resizeOptions
 		}
-		const prefix = buildPrefix(resizeOptions)
-		const modifiedName = `${name}.${params.format}`
+		const sufix = buildSufix(resizeOptions)
+		const sufixedName = `${name}__${sufix}.${params.format}`
 
 		const storage = admin.storage()
 		const bucket = storage.bucket(params.bucket)
 		const original = bucket.file(params.folder + params.name)
-		const modified = bucket.file(params.folder + prefix + '__' + modifiedName)
+		const modified = bucket.file(params.folder + sufixedName)
 
 		// if no requested transforms, redirect to original.
-		if (!prefix && modifiedName === params.name) {
+		if (!sufix && ext === params.format) {
 			const url = await original
 				.getSignedUrl(CONFIG)
 				.catch(e => res.status(500).send(e.message))
@@ -87,11 +83,15 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 
 		// if original exists, and modified doesn't, create it, and redirect to it
 		console.log('creating file...')
-
+		const formats = ['jpeg', 'png', 'webp']
+		const {format} = params
 		const modifiedMeta: CreateWriteStreamOptions = {
 			public: true,
 			metadata: {
-				contentType: `image/${params.format}`
+				contentType: formats.includes(format)
+					? `image/${format}`
+					: 'image/jpeg',
+				cacheControl: 'public, max-age=31536000'
 			}
 		}
 
