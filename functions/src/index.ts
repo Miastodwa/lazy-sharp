@@ -1,27 +1,22 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import * as Cors from 'cors'
-import {
-	buildSufix,
-	splitFileName,
-	parseFolder,
-	buidlPipeline,
-} from './utils'
+import { buildSufix, splitFileName, buidlPipeline } from './utils'
 import { CreateWriteStreamOptions, GetSignedUrlConfig } from '@google-cloud/storage'
 import * as sharp from 'sharp'
 
 const cors = Cors({ origin: true })
-const CONFIG: GetSignedUrlConfig = {
-	action: 'read',
-	expires: '01-01-2100'
-}
+
+const CONFIG: GetSignedUrlConfig = { action: 'read', expires: '01-01-2100' }
+const CACHE_CONTROL = 'public, max-age=31536000'
+const FORMATS = ['jpeg', 'png', 'webp']
 
 const { service } = functions.config()
 const creds = service ? { credential: admin.credential.cert(service) } : {}
 
-admin.initializeApp({
-	...creds
-})
+admin.initializeApp(creds)
+
+// LAZY-SHARP function
 
 export const lazysharp = functions.https.onRequest((req, res) => {
 
@@ -33,9 +28,9 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 
 		// check for required params
 		if (!query.bucket) res.status(422).send('bucket required')
-		if (!query.filename) res.status(422).send('filename required')
+		if (!query.ref) res.status(422).send('ref required')
 
-		const [name, ext] = splitFileName(query.filename)
+		const [name, ext] = splitFileName(query.ref)
 
 		const resizeOptions: sharp.ResizeOptions = {
 			width: +query.width || null,
@@ -47,20 +42,18 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 		}
 		const params = {
 			bucket: query.bucket,
-			folder: parseFolder(query.folder),
-			filename: query.filename,
+			ref: query.ref,
 			result: query.result || 'redirect',
-			format: query.format || ext,
-			cacheControl: query.cacheControl,
-			resizeOptions: resizeOptions
+			format: FORMATS.includes(query.format) ? query.format : 'jpeg',
+			cacheControl: query.cacheControl
 		}
 		const sufix = buildSufix(resizeOptions)
 		const sufixedName = `${name}__${sufix}.${params.format}`
 
 		const storage = admin.storage()
 		const bucket = storage.bucket(params.bucket)
-		const original = bucket.file(params.folder + params.filename)
-		const modified = bucket.file(params.folder + sufixedName)
+		const original = bucket.file(params.ref)
+		const modified = bucket.file(sufixedName)
 
 		// if no requested transforms, redirect to original.
 		if (!sufix && ext === params.format) {
@@ -69,7 +62,7 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 				.catch(e => res.status(500).send(e.message))
 			
 			console.log('original')
-			if (params.result === 'url') res.send(url[0])
+			if (params.result === 'url') res.send({url: url[0]})
 			else res.redirect(301, url[0])
 			return
 		}
@@ -82,29 +75,27 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 		])
 		if (modifiedExists) {
 			console.log('...modified exists')
-			if (params.result === 'url') res.send(modifiedUrl)
+			if (params.result === 'url') res.send({url: modifiedUrl})
 			else res.redirect(301, modifiedUrl)
 			return
 		}
 
 		// if original exists, and modified doesn't, create it, and redirect to it
 		console.log('creating file...')
-		const formats = ['jpeg', 'png', 'webp']
 		const {format} = params
 		const modifiedMeta: CreateWriteStreamOptions = {
 			public: true,
 			metadata: {
-				contentType: formats.includes(format)
-					? `image/${format}`
-					: 'image/jpeg',
-				cacheControl: params.cacheControl || 'public, max-age=31536000'
+				contentType: `image/${format}`,
+				cacheControl: params.cacheControl || CACHE_CONTROL
 			}
 		}
-		const pipeline = await buidlPipeline(resizeOptions, params.format)
+		const pipeline = await buidlPipeline(resizeOptions, format)
 			.catch( e => res.status(422).send(e.message))
 		if (!pipeline) return
 
 		const fileUploadStream = modified.createWriteStream(modifiedMeta)
+
 		original.createReadStream().pipe(pipeline).pipe(fileUploadStream)
 
 		const promiseUpload = new Promise((resolve, reject) =>
@@ -112,10 +103,11 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 				.on('finish', resolve)
 				.on('error', reject)
 		)
+
 		await promiseUpload
 
 		console.log('...file created')
-		if (params.result === 'url') res.send( modifiedUrl )
+		if (params.result === 'url') res.send( {url: modifiedUrl} )
 		else res.redirect(301, modifiedUrl)
 		return
 	})
