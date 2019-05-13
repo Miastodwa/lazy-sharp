@@ -11,7 +11,7 @@ export function parseFolder(folder: string): string {
     return folder + '/'
 }
 
-export function buildPrefix(options: sharp.ResizeOptions): string {
+export function buildSufix(options: sharp.ResizeOptions): string {
 	return Object.keys(options).reduce(
 		(acc, key) => {
 			if (!options[key]) return acc
