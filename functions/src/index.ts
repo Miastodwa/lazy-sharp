@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import * as Cors from 'cors'
-import { buildSufix, splitFileName, buidlPipeline } from './utils'
+import { buildSufix, splitFileName, buildPipeline } from './utils'
 import { CreateWriteStreamOptions, GetSignedUrlConfig } from '@google-cloud/storage'
 import * as sharp from 'sharp'
 
@@ -91,7 +91,7 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 				cacheControl: params.cacheControl || CACHE_CONTROL
 			}
 		}
-		const pipeline = await buidlPipeline(resizeOptions, format)
+		const pipeline = await buildPipeline(resizeOptions, format)
 			.catch( e => res.status(422).send(e.message))
 		if (!pipeline) return
 

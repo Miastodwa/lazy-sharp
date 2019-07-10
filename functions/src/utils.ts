@@ -15,7 +15,7 @@ export function buildSufix(options: sharp.ResizeOptions): string {
 	)
 }
 
-export async function buidlPipeline(
+export async function buildPipeline(
     options: sharp.ResizeOptions,
     format: string | sharp.AvailableFormatInfo
 ) {
