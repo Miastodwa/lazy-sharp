@@ -7,4 +7,4 @@ functions/.runtimeconfig.json
 cloud-functions-emulator.log
 yarn-error.log
 service_account.json
-.runtimeconfig.json
+functions/.runtimeconfig.json
