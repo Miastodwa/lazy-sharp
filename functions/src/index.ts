@@ -1,4 +1,7 @@
-import { CreateWriteStreamOptions, GetSignedUrlConfig } from '@google-cloud/storage'
+import {
+	CreateWriteStreamOptions,
+	GetSignedUrlConfig,
+} from '@google-cloud/storage'
 import * as Cors from 'cors'
 import * as admin from 'firebase-admin'
 import * as functions from 'firebase-functions'
@@ -19,16 +22,20 @@ admin.initializeApp(creds)
 // LAZY-SHARP function
 
 export const lazysharp = functions.https.onRequest((req, res) => {
-
-	if (req.method !== 'GET') { return res.status(405).send('Method Not Allowed') }
+	if (req.method !== 'GET') {
+		return res.status(405).send('Method Not Allowed')
+	}
 
 	return cors(req, res, async () => {
-
 		const { query } = req
 
 		// check for required params
-		if (!query.bucket) { res.status(422).send('bucket required') }
-		if (!query.ref) { res.status(422).send('ref required') }
+		if (!query.bucket) {
+			res.status(422).send('bucket required')
+		}
+		if (!query.ref) {
+			res.status(422).send('ref required')
+		}
 
 		const [name, ext] = splitFileName(query.ref)
 		const originalFormat = ext === 'jpg' ? 'jpeg' : ext
@@ -39,14 +46,14 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 			fit: query.fit,
 			position: query.position,
 			background: query.background,
-			withoutEnlargement: query.withoutEnlargement
+			withoutEnlargement: query.withoutEnlargement,
 		}
 		const params = {
 			bucket: query.bucket,
 			ref: query.ref,
 			result: query.result || 'redirect',
 			format: FORMATS.includes(query.format) ? query.format : 'jpeg',
-			cacheControl: query.cacheControl
+			cacheControl: query.cacheControl,
 		}
 		const sufix = buildSufix(resizeOptions)
 		const sufixedName = `${name}__${sufix}__.${params.format}`
@@ -61,10 +68,13 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 			const url = await original
 				.getSignedUrl(CONFIG)
 				.catch(e => res.status(500).send(e.message))
-			
+
 			console.log('original')
-			if (params.result === 'url') { res.send({url: url[0]}) }
-			else { res.redirect(301, url[0]) }
+			if (params.result === 'url') {
+				res.send({ url: url[0] })
+			} else {
+				res.redirect(301, url[0])
+			}
 			return
 		}
 
@@ -72,44 +82,54 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 		console.log('checking modified...')
 		const [[modifiedExists], [modifiedUrl]] = await Promise.all([
 			modified.exists(),
-			modified.getSignedUrl(CONFIG)
+			modified.getSignedUrl(CONFIG),
 		])
 		if (modifiedExists) {
 			console.log('...modified exists')
-			if (params.result === 'url') { res.send({url: modifiedUrl}) }
-			else { res.redirect(301, modifiedUrl) }
+			if (params.result === 'url') {
+				res.send({ url: modifiedUrl })
+			} else {
+				res.redirect(301, modifiedUrl)
+			}
 			return
 		}
 
 		// if original exists, and modified doesn't, create it, and redirect to it
 		console.log('creating file...')
-		const {format} = params
+		const { format } = params
 		const modifiedMeta: CreateWriteStreamOptions = {
 			public: true,
 			metadata: {
 				contentType: `image/${format}`,
-				cacheControl: params.cacheControl || CACHE_CONTROL
-			}
+				cacheControl: params.cacheControl || CACHE_CONTROL,
+			},
 		}
-		const pipeline = await buildPipeline(resizeOptions, format)
-			.catch( e => res.status(422).send(e.message))
-		if (!pipeline) { return }
+		const pipeline = await buildPipeline(resizeOptions, format).catch(e =>
+			res.status(422).send(e.message)
+		)
+		if (!pipeline) {
+			return
+		}
 
 		const fileUploadStream = modified.createWriteStream(modifiedMeta)
 
-		original.createReadStream().pipe(pipeline).pipe(fileUploadStream)
+		original
+			.createReadStream()
+			.pipe(pipeline)
+			.pipe(fileUploadStream)
 
 		const promiseUpload = new Promise((resolve, reject) =>
-			fileUploadStream
-				.on('finish', resolve)
-				.on('error', reject)
+			fileUploadStream.on('finish', resolve).on('error', reject)
 		)
 
 		await promiseUpload
 
 		console.log('...file created')
-		if (params.result === 'url') { res.send( {url: modifiedUrl} ) }
-		else { res.redirect(301, modifiedUrl) }
+		if (params.result === 'url') {
+			res.send({ url: modifiedUrl })
+		} else {
+			res.redirect(301, modifiedUrl)
+		}
 		return
 	})
 })
