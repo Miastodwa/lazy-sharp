@@ -17,6 +17,8 @@ const FORMATS = ['jpeg', 'png', 'webp']
 const { service } = functions.config()
 const creds = service ? { credential: admin.credential.cert(service) } : {}
 
+console.log(creds, service)
+
 admin.initializeApp(creds)
 
 // LAZY-SHARP function
@@ -68,8 +70,8 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 			const url = await original
 				.getSignedUrl(CONFIG)
 				.catch(e => res.status(500).send(e.message))
-
 			console.log('original')
+
 			if (params.result === 'url') {
 				res.send({ url: url[0] })
 			} else {
