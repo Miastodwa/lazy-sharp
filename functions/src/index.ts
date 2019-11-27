@@ -1,9 +1,9 @@
-import * as functions from 'firebase-functions'
-import * as admin from 'firebase-admin'
-import * as Cors from 'cors'
-import { buildSufix, splitFileName, buildPipeline } from './utils'
 import { CreateWriteStreamOptions, GetSignedUrlConfig } from '@google-cloud/storage'
+import * as Cors from 'cors'
+import * as admin from 'firebase-admin'
+import * as functions from 'firebase-functions'
 import * as sharp from 'sharp'
+import { buildPipeline, buildSufix, splitFileName } from './utils'
 
 const cors = Cors({ origin: true })
 
@@ -20,15 +20,15 @@ admin.initializeApp(creds)
 
 export const lazysharp = functions.https.onRequest((req, res) => {
 
-	if (req.method !== 'GET') return res.status(405).send('Method Not Allowed')
+	if (req.method !== 'GET') { return res.status(405).send('Method Not Allowed') }
 
 	return cors(req, res, async () => {
 
 		const { query } = req
 
 		// check for required params
-		if (!query.bucket) res.status(422).send('bucket required')
-		if (!query.ref) res.status(422).send('ref required')
+		if (!query.bucket) { res.status(422).send('bucket required') }
+		if (!query.ref) { res.status(422).send('ref required') }
 
 		const [name, ext] = splitFileName(query.ref)
 		const originalFormat = ext === 'jpg' ? 'jpeg' : ext
@@ -63,8 +63,8 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 				.catch(e => res.status(500).send(e.message))
 			
 			console.log('original')
-			if (params.result === 'url') res.send({url: url[0]})
-			else res.redirect(301, url[0])
+			if (params.result === 'url') { res.send({url: url[0]}) }
+			else { res.redirect(301, url[0]) }
 			return
 		}
 
@@ -76,8 +76,8 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 		])
 		if (modifiedExists) {
 			console.log('...modified exists')
-			if (params.result === 'url') res.send({url: modifiedUrl})
-			else res.redirect(301, modifiedUrl)
+			if (params.result === 'url') { res.send({url: modifiedUrl}) }
+			else { res.redirect(301, modifiedUrl) }
 			return
 		}
 
@@ -93,7 +93,7 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 		}
 		const pipeline = await buildPipeline(resizeOptions, format)
 			.catch( e => res.status(422).send(e.message))
-		if (!pipeline) return
+		if (!pipeline) { return }
 
 		const fileUploadStream = modified.createWriteStream(modifiedMeta)
 
@@ -108,8 +108,8 @@ export const lazysharp = functions.https.onRequest((req, res) => {
 		await promiseUpload
 
 		console.log('...file created')
-		if (params.result === 'url') res.send( {url: modifiedUrl} )
-		else res.redirect(301, modifiedUrl)
+		if (params.result === 'url') { res.send( {url: modifiedUrl} ) }
+		else { res.redirect(301, modifiedUrl) }
 		return
 	})
 })

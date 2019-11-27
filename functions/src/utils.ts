@@ -8,8 +8,8 @@ export function splitFileName(filename: string) {
 export function buildSufix(options: sharp.ResizeOptions): string {
 	return Object.keys(options).reduce(
 		(acc, key) => {
-			if (!options[key]) return acc
-			if (!acc) return `${key}:${options[key]}`
+			if (!options[key]) { return acc }
+			if (!acc) { return `${key}:${options[key]}` }
 			return `${acc},${key}:${options[key]}`
 		}, null
 	)
