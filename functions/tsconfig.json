@@ -1,17 +1,17 @@
 {
-  "compilerOptions": {
-    "lib": ["es6"],
-    "module": "commonjs",
-    "noImplicitReturns": true,
-    "outDir": "lib",
-    "sourceMap": true,
-    "target": "es6",
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "allowJs": true
-  },
-  "compileOnSave": true,
-  "include": [
-    "src"
-  ]
+	"compilerOptions": {
+		"lib": ["esnext"],
+		"module": "commonjs",
+		"noImplicitReturns": true,
+		"outDir": "lib",
+		"sourceMap": true,
+		"target": "es6",
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
+		"allowJs": true
+	},
+	"compileOnSave": true,
+	"include": [
+		"src"
+	]
 }
