@@ -6,9 +6,12 @@
 	"scripts": {
 		"lint": "tslint --project tsconfig.json",
 		"build": "tsc",
-		"serve": "export GOOGLE_APPLICATION_CREDENTIALS=~/.gcloud/miastodwa-douslug/keyfile.json && npm run build && firebase serve --only functions --port 5050",
+		"emulate": "./.credentials.sh && npm run build && firebase emulators:start --only functions",
 		"shell": "npm run build && firebase functions:shell",
 		"start": "npm run shell",
+		"test": "jest src",
+		"test:cov": "yarn test --collectCoverage",
+		"serve:cov": "http-server ./coverage/lcov-report/",
 		"deploy": "firebase deploy --only functions:lazysharp",
 		"logs": "firebase functions:log"
 	},
@@ -22,8 +25,11 @@
 		"sharp": "^0.23.3"
 	},
 	"devDependencies": {
+		"@types/jest": "^24.0.23",
 		"firebase-functions-test": "^0.1.6",
+		"jest": "^24.9.0",
 		"prettier": "^1.19.1",
+		"ts-jest": "^24.2.0",
 		"tslint": "^5.16.0",
 		"tslint-config-prettier": "^1.18.0",
 		"tslint-plugin-prettier": "^2.0.1",

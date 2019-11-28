@@ -28,7 +28,6 @@ export async function buildPipeline(
 			.resize(width, height, options)
 			.toFormat(format)
 	} catch (error) {
-		console.log(error)
 		throw error
 	}
 }

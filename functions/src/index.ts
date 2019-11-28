@@ -16,7 +16,7 @@ const FORMATS = ['jpeg', 'png', 'webp']
 
 admin.initializeApp()
 
-// OR:
+// OR
 // const { service } = functions.config()
 // const creds = service ? { credential: admin.credential.cert(service) } : {}
 // admin.initializeApp(service)
@@ -112,6 +112,7 @@ export const lazysharp = functions
 				}
 			}
 
+			// if neither original or modified exist, return 404
 			const [originalExists] = await original.exists().catch(e => null)
 			if (!originalExists) {
 				return res.status(404).send(`${params.ref} does not exist`)
@@ -130,9 +131,9 @@ export const lazysharp = functions
 			const pipeline = await buildPipeline(
 				resizeOptions,
 				format
-			).catch(e => res.status(422).send(e.message))
-			if (!pipeline) {
-				return
+			).catch(e => Error(e))
+			if (pipeline instanceof Error) {
+				return res.status(422).send(pipeline.message)
 			}
 
 			const fileUploadStream = modified.createWriteStream(modifiedMeta)

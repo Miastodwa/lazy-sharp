@@ -8,3 +8,4 @@ cloud-functions-emulator.log
 yarn-error.log
 service_account.json
 functions/.runtimeconfig.json
+functions/.credentials.sh
