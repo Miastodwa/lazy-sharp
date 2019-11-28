@@ -112,7 +112,7 @@ export const lazysharp = functions
 				}
 			}
 
-			const [originalExists] = await original.exists().catch()
+			const [originalExists] = await original.exists().catch(e => null)
 			if (!originalExists) {
 				return res.status(404).send(`${params.ref} does not exist`)
 			}
