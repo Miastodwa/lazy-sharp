@@ -57,7 +57,8 @@ The function must be authenticated both locally and when deployed.
 #### Remote invocation
 
 It is important that the default **Service account** has right permissions.
-[more information]
+Permission iam.serviceAccounts.signBlob is required on your _App Engine default service account_ to execute this function.
+You can add a role: `Cloud Functions Service Agent` in your IAM settings.
 
 #### Local invocation
 
