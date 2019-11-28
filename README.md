@@ -70,9 +70,7 @@ When the function is called locally through the emulator, you need to use **one*
 
 **B. Manually pass credentials to `admin.initializeApp()`**
 
-Save your credentials from keyfile.json to `.runtimeconfig.json`.
-
-In the `src/index.ts` replace:
+Save your credentials from keyfile.json to `.runtimeconfig.json`. In the `src/index.ts` replace:
 
 ```typescript
 admin.initializeApp();
