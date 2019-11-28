@@ -11,7 +11,8 @@ This function accepts only `GET` requests with `query params`.
 -   All subsequent requests with the same params will be redirected to that image.
 
 Example call:
-https://<FUNCTION_URL>/lazysharp?bucket=my-bucket&ref=images/cover-1.jpg&width=300&height=300&fit=cover&position=top&format=webp
+
+https://<FUNCTION_URL>/lazysharp?**bucket**=my-bucket&**ref**=images/cover-1.jpg&**width**=300&**height**=300&**fit**=cover&**position**=top&**format**=webp
 
 ### Query params
 
@@ -52,7 +53,7 @@ When both a width and height are provided, the possible methods by which the ima
 
 ### Authenticate function
 
-The function must be authenticated both locally and when deployed.
+In order to work, this function must be authenticated both locally and when deployed.
 
 #### Remote invocation
 
@@ -63,10 +64,20 @@ You can add a role: `Cloud Functions Service Agent` in your IAM settings.
 #### Local invocation
 
 When the function is called locally through the emulator, you need to use **one** of the below methods:
+
 **A. Set a global variable**
 [more information](https://cloud.google.com/docs/authentication/getting-started#auth-cloud-implicit-nodejs)
 
 **B. Manually pass credentials to `admin.initializeApp()`**
+
+Save your credentials from keyfile.json to `.runtimeconfig.json`
+In the `src/index.ts` replace:
+
+```typescript
+admin.initializeApp(creds);
+```
+
+with:
 
 ```typescript
 import * as functions from "firebase-functions";
