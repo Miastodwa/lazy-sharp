@@ -6,10 +6,10 @@
 	"scripts": {
 		"lint": "tslint --project tsconfig.json",
 		"build": "tsc",
-		"serve": "npm run build && firebase serve --only functions --port 5050",
+		"serve": "export GOOGLE_APPLICATION_CREDENTIALS=~/.gcloud/miastodwa-douslug/keyfile.json && npm run build && firebase serve --only functions --port 5050",
 		"shell": "npm run build && firebase functions:shell",
 		"start": "npm run shell",
-		"deploy": "firebase deploy --only functions",
+		"deploy": "firebase deploy --only functions:lazysharp",
 		"logs": "firebase functions:log"
 	},
 	"main": "lib/index.js",

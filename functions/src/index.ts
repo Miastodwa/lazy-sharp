@@ -14,18 +14,20 @@ const CONFIG: GetSignedUrlConfig = { action: 'read', expires: '01-01-2100' }
 const CACHE_CONTROL = 'public, max-age=31536000'
 const FORMATS = ['jpeg', 'png', 'webp']
 
-const { service } = functions.config()
-const creds = service ? { credential: admin.credential.cert(service) } : {}
+// const { service } = functions.config()
+// const creds = service ? { credential: admin.credential.cert(service) } : {}
+// admin.initializeApp(service)
 
-console.log(creds, service)
-
-admin.initializeApp(creds)
+admin.initializeApp()
 
 // LAZY-SHARP function
 
 export const lazysharp = functions.https.onRequest((req, res) => {
 	if (req.method !== 'GET') {
-		return res.status(405).send('Method Not Allowed')
+		return res
+			.status(405)
+			.send('Method Not Allowed')
+			.end()
 	}
 
 	return cors(req, res, async () => {
