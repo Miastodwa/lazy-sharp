@@ -2,7 +2,7 @@
 
 firebase function for on the fly image transformation using [sharp library](https://www.npmjs.com/package/sharp).
 
-### How it works?
+## How it works?
 
 This function accepts only `GET` requests with `query params`.
 
@@ -14,7 +14,7 @@ Example call:
 
 https://<FUNCTION_URL>/lazysharp?**bucket**=my-bucket&**ref**=images/cover-1.jpg&**width**=300&**height**=300&**fit**=cover&**position**=top&**format**=webp
 
-### Query params
+## Query params
 
 **`bucket`** — name of the bucket
 
@@ -51,24 +51,26 @@ When both a width and height are provided, the possible methods by which the ima
 **`cacheControl`**
 – image cacheControl. defaults to `public, max-age=31536000`
 
-### Authenticate function
+## Authenticate function
 
 In order to work, this function must be authenticated both locally and when deployed.
 
-#### Remote invocation
+### Remote invocation
 
-It is important that the default **Service account** has right permissions.
-Permission iam.serviceAccounts.signBlob is required on your _App Engine default service account_ to execute this function.
-You can add a role: `Cloud Functions Service Agent` in your IAM settings.
+⚠️It is important that the service account running this function has right permissions.
+The account running your firebase functions will usually be **App Engine default service account**.
+You must make sure that this account has a `iam.serviceAccounts.signBlob` permission on.
+To add this permission You can enable a role: `Cloud Functions Service Agent` in your IAM settings.
 
-#### Local invocation
+### Local invocation
 
 When the function is called locally through the emulator, you need to use **one** of the below methods:
 
-**A. Set a global variable**
+#### A. Set a global variable
+
 [more information](https://cloud.google.com/docs/authentication/getting-started#auth-cloud-implicit-nodejs)
 
-**B. Manually pass credentials to `admin.initializeApp()`**
+#### B. Manually pass credentials to `admin.initializeApp()`
 
 Save your credentials from keyfile.json to `.runtimeconfig.json`. In the `src/index.ts` replace:
 
