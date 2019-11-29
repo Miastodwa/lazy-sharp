@@ -62,31 +62,9 @@ To add this permission You can enable a role: `Cloud Functions Service Agent` in
 
 During development, when the function is called locally through the emulator, you still need to authenticate it. To do so, you need to obtain a json file with credentials associated with service account that have the permissions to execute the function. Here are instructions on how to download credentials in a json file: [Getting Started with Authentication](https://cloud.google.com/docs/authentication/getting-started)
 
-Whe you have the file, you can use **one** of the following methods to authenticate your function locally:
-
-#### A. Set a global variable
-
-Yo need to provide authentication credentials by setting the environment variable GOOGLE_APPLICATION_CREDENTIALS. 
+Whe you have the file,  you need to provide authentication credentials by setting the environment variable GOOGLE_APPLICATION_CREDENTIALS to the absolute path of your file.
 
 - rename file `functions/.credentials.example.sh` to `functions/.credentials.sh` 
 - Edit the file: Replace path with the file path of the JSON file that contains your actual service account key.
 
 [more information](https://cloud.google.com/docs/authentication/getting-started)
-
-#### B. Manually pass credentials to `admin.initializeApp()` function
-
-- Save your credentials from keyfile.json to `.runtimeconfig.json`.
-- In the `src/index.ts` replace:
-
-```typescript
-admin.initializeApp();
-```
-
-with:
-
-```typescript
-const { service } = functions.config();
-// service is an object equal to contents of credentials json file.
-const creds = service ? { credential: admin.credential.cert(service) } : {};
-admin.initializeApp(creds);
-```
