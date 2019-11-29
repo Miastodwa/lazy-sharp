@@ -13,33 +13,37 @@ import {
 	getPreset,
 	getResizeOptions,
 	splitFileName,
+	UnhandledRejections,
 } from './utils'
 
-const { settings } = functions.config()
+const {
+	settings: { presets_only, cors_origin, mode },
+} = functions.config()
 
-const cors = Cors({ origin: true })
 const CONFIG: GetSignedUrlConfig = { action: 'read', expires: '01-01-2100' }
-const PRESETS_ONLY = !!settings.presets_only
+const PRESETS_ONLY = !!presets_only
+const CORS_ORIGIN = (cors_origin && cors_origin.split(',')) || true
+
+const cors = Cors({ origin: CORS_ORIGIN, methods: 'GET' })
 
 admin.initializeApp()
 
 export const lazysharp = functions
 	.region('europe-west1')
 	.https.onRequest((req, res) => {
-		process.on('unhandledRejection', error => {
-			console.error('unhandledRejection', error)
-			return res.status(500).send(error)
-		})
-
-		if (req.method !== 'GET') {
-			return res.status(405).send('Method Not Allowed')
-		}
+		// process unhandled rejections and log them in dev
+		process.on('unhandledRejection', error =>
+			UnhandledRejections(mode, error, res)
+		)
 
 		return cors(req, res, async () => {
 			const query: QueryParams = req.query
 			const preset = getPreset(query)
 
 			// check for required query params
+			if (!req.method) {
+				return res.status(405).send('method not allowed')
+			}
 			if (!query.bucket) {
 				return res.status(422).send('bucket required')
 			}

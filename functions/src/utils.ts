@@ -1,3 +1,4 @@
+import { Response } from 'firebase-functions'
 import * as sharp from 'sharp'
 import { Preset, QueryParams } from './@types'
 import presets from './presets'
@@ -76,4 +77,16 @@ export const buildPipeline = async (
 	} catch (error) {
 		throw error
 	}
+}
+
+export const UnhandledRejections = (
+	mode: string,
+	error: object,
+	res: Response
+) => {
+	if (mode !== 'development') {
+		return res.status(500).send('unhandledRejection')
+	}
+	console.error('unhandledRejection', error)
+	return res.status(500).send(error)
 }
