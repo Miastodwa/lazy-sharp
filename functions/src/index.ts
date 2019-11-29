@@ -6,7 +6,8 @@ import * as Cors from 'cors'
 import * as admin from 'firebase-admin'
 import * as functions from 'firebase-functions'
 import * as sharp from 'sharp'
-import { buildPipeline, buildSufix, splitFileName } from './utils'
+import { QueryParams } from './@types/index.d'
+import { buildPipeline, generateSufix, getPreset, splitFileName } from './utils'
 
 const cors = Cors({ origin: true })
 
@@ -29,7 +30,7 @@ export const lazysharp = functions
 		}
 
 		return cors(req, res, async () => {
-			const { query } = req
+			const query: QueryParams = req.query
 
 			// check for required params
 			if (!query.bucket) {
@@ -38,6 +39,8 @@ export const lazysharp = functions
 			if (!query.ref) {
 				return res.status(422).send('ref required')
 			}
+
+			console.log(getPreset(query))
 
 			const [name, ext] = splitFileName(query.ref)
 			const originalFormat = ext === 'jpg' ? 'jpeg' : ext
@@ -55,9 +58,9 @@ export const lazysharp = functions
 				ref: query.ref,
 				result: query.result || 'redirect',
 				format: FORMATS.includes(query.format) ? query.format : 'jpeg',
-				cacheControl: query.cacheControl,
+				cacheControl: query.cacheControl || CACHE_CONTROL,
 			}
-			const sufix = buildSufix(resizeOptions)
+			const sufix = generateSufix(resizeOptions)
 			const sufixedName = `${name}__${sufix}__.${params.format}`
 
 			const storage = admin.storage()
@@ -72,7 +75,7 @@ export const lazysharp = functions
 					.catch(e => [Error(e)])
 
 				if (url instanceof Error) {
-					console.error(url)
+					console.log(url)
 					return res.status(500).send(url.message)
 				}
 
@@ -93,7 +96,7 @@ export const lazysharp = functions
 			]).catch(e => Error(e))
 
 			if (modifiedData instanceof Error) {
-				console.error(modifiedData)
+				console.log(modifiedData)
 				return res.status(500).send(modifiedData.message)
 			}
 			const [[modifiedExists], [modifiedUrl]] = modifiedData

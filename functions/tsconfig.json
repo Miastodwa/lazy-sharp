@@ -8,10 +8,8 @@
 		"target": "es6",
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
-		"allowJs": true
+		"allowJs": true,
 	},
 	"compileOnSave": true,
-	"include": [
-		"src", "jest.config.js"
-	]
+	"include": ["src", "jest.config.js"]
 }

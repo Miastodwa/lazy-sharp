@@ -1,5 +1,5 @@
 import { ResizeOptions, Sharp } from 'sharp'
-import { buildPipeline, buildSufix, splitFileName } from '../utils'
+import { buildPipeline, generateSufix, splitFileName } from '../utils'
 const resizeOptions: ResizeOptions = {
 	width: 300,
 	height: null,
@@ -17,7 +17,7 @@ test('split file name', () => {
 })
 
 test('create a suffix', () => {
-	const suffix = buildSufix(resizeOptions)
+	const suffix = generateSufix(resizeOptions)
 	const suffixExpected =
 		'width:300,fit:contain,position:top,background:pink,withoutEnlargement:true'
 	expect(suffix).toBe(suffixExpected)

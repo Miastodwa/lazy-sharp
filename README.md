@@ -1,7 +1,3 @@
-# lazysharp
-
-firebase function for on the fly image transformation using [sharp library](https://www.npmjs.com/package/sharp).
-
 ## How it works?
 
 This function accepts only `GET` requests with `query params`.
@@ -12,7 +8,7 @@ This function accepts only `GET` requests with `query params`.
 
 Example call:
 
-https://<FUNCTION_URL>/lazysharp?**bucket**=my-bucket&**ref**=images/cover-1.jpg&**width**=300&**height**=300&**fit**=cover&**position**=top&**format**=webp
+>  https://<FUNCTION_URL>/lazysharp?**bucket**=my-bucket&**ref**=images/cover-1.jpg&**width**=300&**height**=300&**fit**=cover&**position**=top&**format**=webp`
 
 ## Query params
 
@@ -21,6 +17,8 @@ Query parameters are used to create arguments for `sharp`
 **`bucket`** – name of the bucket
 
 **`ref`** – path to file (e.g. `images/my-image.jpg`)
+
+`preset` – name of the preset transformation (e.g. `thumbnail`) see: Presets. When set, other transformation params will be ignored.
 
 **`width`** – resize to width in px (e.g. `300`)
 
@@ -46,6 +44,42 @@ Query parameters are used to create arguments for `sharp`
 **`result`** – return a signed url string, or redirect to the image. Possible values: `url`, `redirect` (default).
 
 **`cacheControl`** – image cacheControl. defaults to `public, max-age=31536000`
+
+## Presets
+
+It is a good idea to create some transformation presets, and then perhaps, also disable arbitrary query params, so that the function will be permitted to only generate files in preset formats. This will prevent the abuse of this function to create needless image files and litter your bucket.
+
+To create your presets edit `functions/src/presets` file (`json` or `ts`).
+
+To allow only preset transformations, you need to set firebase env variables:
+
+- for deployment: `functions:config:set settings.presets_only=true`
+
+- for local emulator: edit `functions/.runtimeconfig.json` by adding:
+
+  ```json
+  {
+  	"settings": {
+  		"presets_only": true
+  	}
+  }
+  ```
+
+## CORS
+
+To setup CORS limits , you need to edit firebase env variables:
+
+- for deployment: `functions:config:set settings.cors="your cors limits"`
+
+- for local emulator: edit `functions/.runtimeconfig.json` by adding:
+
+  ```json
+  {
+  	"settings": {
+  		"cors": "your cors limits"
+  	}
+  }
+  ```
 
 ## Authenticate function
 
