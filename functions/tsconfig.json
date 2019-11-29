@@ -11,5 +11,7 @@
 		"allowJs": true,
 	},
 	"compileOnSave": true,
-	"include": ["src", "jest.config.js"]
+	"include": [
+		"src"
+	],
 }

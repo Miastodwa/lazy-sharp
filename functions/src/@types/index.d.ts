@@ -1,9 +1,7 @@
 import { ResizeOptions } from 'sharp'
 
-declare type ResultFormat = 'webp' | 'jpeg' | 'png'
-
 export interface Preset extends ResizeOptions {
-	format?: ResultFormat
+	format?: QueryParams['format']
 }
 
 export interface Presets {
@@ -13,8 +11,8 @@ export interface Presets {
 export interface QueryParams {
 	bucket?: string
 	ref?: string
-	result?: string
-	format?: string
+	result?: 'url' | 'redirect'
+	format?: 'webp' | 'jpeg' | 'png'
 	cacheControl?: string
 	preset?: string
 	width?: ResizeOptions['width']

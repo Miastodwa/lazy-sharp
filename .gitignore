@@ -4,8 +4,8 @@ functions/lib
 functions/cloud-functions-emulator.log
 functions/firebase-debug.log
 functions/.runtimeconfig.json
+functions/.emulate.json
+functions/.deploy.json
 cloud-functions-emulator.log
 yarn-error.log
 service_account.json
-functions/.runtimeconfig.json
-functions/.credentials.sh

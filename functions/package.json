@@ -6,13 +6,13 @@
 	"scripts": {
 		"lint": "tslint --project tsconfig.json",
 		"build": "tsc",
-		"emulate": "./.credentials.sh && npm run build && firebase emulators:start --only functions",
+		"emulate": "./.emulate.sh",
 		"shell": "npm run build && firebase functions:shell",
 		"start": "npm run shell",
 		"test": "jest src",
 		"test:cov": "yarn test --collectCoverage",
 		"serve:cov": "http-server ./coverage/lcov-report/",
-		"deploy": "firebase deploy --only functions:lazysharp",
+		"deploy": "./.deploy.sh",
 		"logs": "firebase functions:log"
 	},
 	"main": "lib/index.js",

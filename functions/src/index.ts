@@ -5,15 +5,20 @@ import {
 import * as Cors from 'cors'
 import * as admin from 'firebase-admin'
 import * as functions from 'firebase-functions'
-import * as sharp from 'sharp'
-import { QueryParams } from './@types/index.d'
-import { buildPipeline, generateSufix, getPreset, splitFileName } from './utils'
+import { QueryParams } from './@types'
+import {
+	buildPipeline,
+	generateSufix,
+	getFileParams,
+	getPreset,
+	getResizeOptions,
+	splitFileName,
+} from './utils'
 
 const cors = Cors({ origin: true })
 
 const CONFIG: GetSignedUrlConfig = { action: 'read', expires: '01-01-2100' }
-const CACHE_CONTROL = 'public, max-age=31536000'
-const FORMATS = ['jpeg', 'png', 'webp']
+const PRESET_ONLY = false
 
 admin.initializeApp()
 
@@ -21,7 +26,7 @@ export const lazysharp = functions
 	.region('europe-west1')
 	.https.onRequest((req, res) => {
 		process.on('unhandledRejection', error => {
-			console.log('unhandledRejection', error)
+			console.error('unhandledRejection', error)
 			return res.status(500).send(error)
 		})
 
@@ -31,57 +36,49 @@ export const lazysharp = functions
 
 		return cors(req, res, async () => {
 			const query: QueryParams = req.query
+			const preset = getPreset(query)
 
-			// check for required params
+			// check for required query params
 			if (!query.bucket) {
 				return res.status(422).send('bucket required')
 			}
 			if (!query.ref) {
 				return res.status(422).send('ref required')
 			}
-
-			console.log(getPreset(query))
+			if (PRESET_ONLY && !preset) {
+				return res
+					.status(422)
+					.send('only preset configurations allowed')
+			}
 
 			const [name, ext] = splitFileName(query.ref)
 			const originalFormat = ext === 'jpg' ? 'jpeg' : ext
 
-			const resizeOptions: sharp.ResizeOptions = {
-				width: +query.width || null,
-				height: +query.height || null,
-				fit: query.fit,
-				position: query.position,
-				background: query.background,
-				withoutEnlargement: query.withoutEnlargement,
-			}
-			const params = {
-				bucket: query.bucket,
-				ref: query.ref,
-				result: query.result || 'redirect',
-				format: FORMATS.includes(query.format) ? query.format : 'jpeg',
-				cacheControl: query.cacheControl || CACHE_CONTROL,
-			}
+			const resizeOptions = getResizeOptions(query)
+			const fileParams = getFileParams(query)
+
 			const sufix = generateSufix(resizeOptions)
-			const sufixedName = `${name}__${sufix}__.${params.format}`
+			const sufixedName = `${name}__${sufix}__.${fileParams.format}`
 
 			const storage = admin.storage()
-			const bucket = storage.bucket(params.bucket)
-			const original = bucket.file(params.ref)
+			const bucket = storage.bucket(fileParams.bucket)
+			const original = bucket.file(fileParams.ref)
 			const modified = bucket.file(sufixedName)
 
 			// if no requested transforms, redirect to original.
-			if (!sufix && originalFormat === params.format) {
+			if (!sufix && originalFormat === fileParams.format) {
 				const [url] = await original
 					.getSignedUrl(CONFIG)
 					.catch(e => [Error(e)])
 
 				if (url instanceof Error) {
-					console.log(url)
+					console.error(url)
 					return res.status(500).send(url.message)
 				}
 
 				console.log('original')
 
-				if (params.result === 'url') {
+				if (fileParams.result === 'url') {
 					return res.send(url)
 				} else {
 					return res.redirect(301, url)
@@ -103,7 +100,7 @@ export const lazysharp = functions
 
 			if (modifiedExists) {
 				console.log('...modified exists')
-				if (params.result === 'url') {
+				if (fileParams.result === 'url') {
 					return res.send(modifiedUrl)
 				} else {
 					return res.redirect(301, modifiedUrl)
@@ -113,17 +110,17 @@ export const lazysharp = functions
 			// if neither original or modified exist, return 404
 			const [originalExists] = await original.exists().catch(e => null)
 			if (!originalExists) {
-				return res.status(404).send(`${params.ref} does not exist`)
+				return res.status(404).send(`${fileParams.ref} does not exist`)
 			}
 
 			// if modified doesn't exist and original does, create modified, and redirect to it
 			console.log('creating file...')
-			const { format } = params
+			const { format } = fileParams
 			const modifiedMeta: CreateWriteStreamOptions = {
 				public: true,
 				metadata: {
 					contentType: `image/${format}`,
-					cacheControl: params.cacheControl || CACHE_CONTROL,
+					cacheControl: fileParams.cacheControl,
 				},
 			}
 			const pipeline = await buildPipeline(
@@ -148,7 +145,7 @@ export const lazysharp = functions
 			await promiseUpload
 
 			console.log('...file created')
-			if (params.result === 'url') {
+			if (fileParams.result === 'url') {
 				return res.send(modifiedUrl)
 			} else {
 				return res.redirect(301, modifiedUrl)

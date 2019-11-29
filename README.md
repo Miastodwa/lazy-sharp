@@ -8,11 +8,11 @@ This function accepts only `GET` requests with `query params`.
 
 Example call:
 
->  https://<FUNCTION_URL>/lazysharp?**bucket**=my-bucket&**ref**=images/cover-1.jpg&**width**=300&**height**=300&**fit**=cover&**position**=top&**format**=webp`
+> https://<FUNCTION_URL>/lazysharp?**bucket**=my-bucket&**ref**=images/cover-1.jpg&**width**=300&**height**=300&**fit**=cover&**position**=top&**format**=webp`
 
 ## Query params
 
-Query parameters are used to create arguments for `sharp` 
+Query parameters are used to create arguments for `sharp`
 
 **`bucket`** – name of the bucket
 
@@ -53,33 +53,33 @@ To create your presets edit `functions/src/presets` file (`json` or `ts`).
 
 To allow only preset transformations, you need to set firebase env variables:
 
-- for deployment: `functions:config:set settings.presets_only=true`
+-   for deployment: `functions:config:set settings.presets_only=true`
 
-- for local emulator: edit `functions/.runtimeconfig.json` by adding:
+-   for local emulator: edit `functions/.runtimeconfig.json` by adding:
 
-  ```json
-  {
-  	"settings": {
-  		"presets_only": true
-  	}
-  }
-  ```
+    ```json
+    {
+    	"settings": {
+    		"presets_only": true
+    	}
+    }
+    ```
 
 ## CORS
 
 To setup CORS limits , you need to edit firebase env variables:
 
-- for deployment: `functions:config:set settings.cors="your cors limits"`
+-   for deployment: `functions:config:set settings.cors="your cors limits"`
 
-- for local emulator: edit `functions/.runtimeconfig.json` by adding:
+-   for local emulator: edit `functions/.runtimeconfig.json` by adding:
 
-  ```json
-  {
-  	"settings": {
-  		"cors": "your cors limits"
-  	}
-  }
-  ```
+    ```json
+    {
+    	"settings": {
+    		"cors": "your cors limits"
+    	}
+    }
+    ```
 
 ## Authenticate function
 
@@ -87,7 +87,7 @@ In order to work, this function must be authenticated both locally and when depl
 
 ### Remote invocation
 
-⚠️It is important that the service account running this function has right permissions.
+⚠️ It is important that the service account running this function has right permissions.
 The account running your firebase functions will usually be **App Engine default service account**. You must make sure that this account has a `iam.serviceAccounts.signBlob` permission on.
 
 To add this permission You can enable a role: `Cloud Functions Service Agent` in your IAM settings, on the App Engine default service account.
@@ -96,9 +96,6 @@ To add this permission You can enable a role: `Cloud Functions Service Agent` in
 
 During development, when the function is called locally through the emulator, you still need to authenticate it. To do so, you need to obtain a json file with credentials associated with service account that have the permissions to execute the function. Here are instructions on how to download credentials in a json file: [Getting Started with Authentication](https://cloud.google.com/docs/authentication/getting-started)
 
-Whe you have the file,  you need to provide authentication credentials by setting the environment variable GOOGLE_APPLICATION_CREDENTIALS to the absolute path of your file.
-
-- rename file `functions/.credentials.example.sh` to `functions/.credentials.sh` 
-- Edit the file: Replace path with the file path of the JSON file that contains your actual service account key.
+Whe you have the file, you need to provide authentication credentials by setting the environment variable GOOGLE_APPLICATION_CREDENTIALS to the absolute path of your file.
 
 [more information](https://cloud.google.com/docs/authentication/getting-started)
