@@ -16,11 +16,6 @@ const FORMATS = ['jpeg', 'png', 'webp']
 
 admin.initializeApp()
 
-// OR
-// const { service } = functions.config()
-// const creds = service ? { credential: admin.credential.cert(service) } : {}
-// admin.initializeApp(service)
-
 export const lazysharp = functions
 	.region('europe-west1')
 	.https.onRequest((req, res) => {

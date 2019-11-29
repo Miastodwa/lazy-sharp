@@ -16,16 +16,17 @@ https://<FUNCTION_URL>/lazysharp?**bucket**=my-bucket&**ref**=images/cover-1.jpg
 
 ## Query params
 
-**`bucket`** — name of the bucket
+Query parameters are used to create arguments for `sharp` 
 
-**`ref`** – path to file (e.g: `images/my-image.jpg`)
+**`bucket`** – name of the bucket
 
-**`width`** – resize to width
+**`ref`** – path to file (e.g. `images/my-image.jpg`)
 
-**`height`** – resize to height
+**`width`** – resize to width in px (e.g. `300`)
 
-**`fit`**
-When both a width and height are provided, the possible methods by which the image should fit these are:
+**`height`** – resize to height in px (e.g. `300`)
+
+**`fit`** – **when both a width and height are provided**, the possible methods by which the image should fit these are:
 
 -   `cover`: Crop to cover both provided dimensions (the default).
 -   `contain`: Embed within both provided dimensions.
@@ -33,23 +34,18 @@ When both a width and height are provided, the possible methods by which the ima
 -   `inside`: Preserving aspect ratio, resize the image to be as large as possible while ensuring its dimensions are less than or equal to both those specified.
 -   `outside`: Preserving aspect ratio, resize the image to be as small as possible while ensuring its dimensions are greater than or equal to both those specified.
 
-**`position`** – When using a fit of cover or contain, the default position is centre. Other options are:
+**`position`** – when using a fit of cover or contain, the default position is centre. Other options are:
 `top`, `right top`, `right`, `right bottom`, `bottom`, `left bottom`, `left`, `left top`.
 
-**`background`**
-– background colour when using a fit of contain, parsed by the [color](https://www.npmjs.org/package/color) module, defaults to black without transparency.
+**`background`** – background colour when using a fit of contain, parsed by the [color](https://www.npmjs.org/package/color) module, defaults to black without transparency.
 
-**`withoutEnlargement`**
-– do not enlarge if the width or height are already less than the specified dimensions
+**`withoutEnlargement`** – do not enlarge if the width or height are already less than the specified dimensions
 
-**`result`**
-– return a signed url string, or redirect to the image. Possible values: `url`, `redirect` (default).
+**`format`** – image output format: `jpeg`, `png`, `webp`
 
-**`format`**
-– image output format: `jpeg`, `png`, `webp`
+**`result`** – return a signed url string, or redirect to the image. Possible values: `url`, `redirect` (default).
 
-**`cacheControl`**
-– image cacheControl. defaults to `public, max-age=31536000`
+**`cacheControl`** – image cacheControl. defaults to `public, max-age=31536000`
 
 ## Authenticate function
 
@@ -58,21 +54,29 @@ In order to work, this function must be authenticated both locally and when depl
 ### Remote invocation
 
 ⚠️It is important that the service account running this function has right permissions.
-The account running your firebase functions will usually be **App Engine default service account**.
-You must make sure that this account has a `iam.serviceAccounts.signBlob` permission on.
-To add this permission You can enable a role: `Cloud Functions Service Agent` in your IAM settings.
+The account running your firebase functions will usually be **App Engine default service account**. You must make sure that this account has a `iam.serviceAccounts.signBlob` permission on.
+
+To add this permission You can enable a role: `Cloud Functions Service Agent` in your IAM settings, on the App Engine default service account.
 
 ### Local invocation
 
-When the function is called locally through the emulator, you need to use **one** of the below methods:
+During development, when the function is called locally through the emulator, you still need to authenticate it. To do so, you need to obtain a json file with credentials associated with service account that have the permissions to execute the function. Here are instructions on how to download credentials in a json file: [Getting Started with Authentication](https://cloud.google.com/docs/authentication/getting-started)
+
+Whe you have the file, you can use **one** of the following methods to authenticate your function locally:
 
 #### A. Set a global variable
 
-[more information](https://cloud.google.com/docs/authentication/getting-started#auth-cloud-implicit-nodejs)
+Yo need to provide authentication credentials by setting the environment variable GOOGLE_APPLICATION_CREDENTIALS. 
 
-#### B. Manually pass credentials to `admin.initializeApp()`
+- rename file `functions/.credentials.example.sh` to `functions/.credentials.sh` 
+- Edit the file: Replace path with the file path of the JSON file that contains your actual service account key.
 
-Save your credentials from keyfile.json to `.runtimeconfig.json`. In the `src/index.ts` replace:
+[more information](https://cloud.google.com/docs/authentication/getting-started)
+
+#### B. Manually pass credentials to `admin.initializeApp()` function
+
+- Save your credentials from keyfile.json to `.runtimeconfig.json`.
+- In the `src/index.ts` replace:
 
 ```typescript
 admin.initializeApp();
@@ -81,9 +85,8 @@ admin.initializeApp();
 with:
 
 ```typescript
-import * as functions from "firebase-functions";
 const { service } = functions.config();
-// service is an object equal to keyfile.json. Just save it in runtimeconfig.json
+// service is an object equal to contents of credentials json file.
 const creds = service ? { credential: admin.credential.cert(service) } : {};
 admin.initializeApp(creds);
 ```
