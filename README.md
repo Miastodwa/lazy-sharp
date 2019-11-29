@@ -1,10 +1,12 @@
+Create on-the-fly resized, cropped and optimized versions of images in your GCP bucket, with query parameters!
+
 ## How it works?
 
 This function accepts only `GET` requests with `query params`.
 
 -   It will return an image after applying requested transformations, such as resizing, cropping, etc.
 -   If the image with those specific transformations did not exists, it will save it to the bucket.
--   All subsequent requests with the same params will be redirected to that image.
+-   All subsequent requests with the same params will be redirected to that image, so the transformations will execute **only once**.
 
 Example call:
 
@@ -81,7 +83,30 @@ To setup CORS limits , you need to edit firebase env variables:
     }
     ```
 
-## Authenticate function
+## Deployment
+
+To automate deployment, create a `.deploy.sh` file inslide `/functions`  folder, with your deplyment script:
+
+```sh
+# if you want to, set deployed env variables here:
+# firebase functions:config:set settings.preset_only=true
+
+firebase deploy --only functions:lazysharp
+```
+
+Then run `yarn deploy`
+
+## Emulator
+
+To launch an emulator, create an `.emulate.sh` file inslide `/functions`  with your emulate script:
+
+```sh
+export GOOGLE_APPLICATION_CREDENTIALS=[PATH-TO-CREDENTIALS] && npm run build && firebase emulators:start --only functions
+```
+
+Then run `yarn emulate`
+
+## Authentication
 
 In order to work, this function must be authenticated both locally and when deployed.
 

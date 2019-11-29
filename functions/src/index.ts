@@ -15,10 +15,11 @@ import {
 	splitFileName,
 } from './utils'
 
-const cors = Cors({ origin: true })
+const { settings } = functions.config()
 
+const cors = Cors({ origin: true })
 const CONFIG: GetSignedUrlConfig = { action: 'read', expires: '01-01-2100' }
-const PRESET_ONLY = false
+const PRESETS_ONLY = !!settings.presets_only
 
 admin.initializeApp()
 
@@ -45,10 +46,10 @@ export const lazysharp = functions
 			if (!query.ref) {
 				return res.status(422).send('ref required')
 			}
-			if (PRESET_ONLY && !preset) {
+			if (PRESETS_ONLY && !preset) {
 				return res
 					.status(422)
-					.send('only preset configurations allowed')
+					.send(`only preset configurations allowed: ${PRESETS_ONLY}`)
 			}
 
 			const [name, ext] = splitFileName(query.ref)
