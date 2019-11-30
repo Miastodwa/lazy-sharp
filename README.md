@@ -14,7 +14,7 @@ Example call:
 
 ## Query params
 
-Query parameters are used to create arguments for `sharp`
+Query parameters are used to create arguments for `sharp` transformations and general input and output formats.
 
 **`bucket`** – name of the bucket
 
@@ -26,7 +26,7 @@ Query parameters are used to create arguments for `sharp`
 
 **`height`** – resize to height in px (e.g. `300`)
 
-**`fit`** – **when both a width and height are provided**, the possible methods by which the image should fit these are:
+**`fit`** – **when both a width and height are provided**, the possible methods by which the image should fit. These are:
 
 -   `cover`: Crop to cover both provided dimensions (the default).
 -   `contain`: Embed within both provided dimensions.
@@ -34,7 +34,7 @@ Query parameters are used to create arguments for `sharp`
 -   `inside`: Preserving aspect ratio, resize the image to be as large as possible while ensuring its dimensions are less than or equal to both those specified.
 -   `outside`: Preserving aspect ratio, resize the image to be as small as possible while ensuring its dimensions are greater than or equal to both those specified.
 
-**`position`** – when using a fit of cover or contain, the default position is centre. Other options are:
+**`position`** – when using a **fit** of `cover` or `contain`, the default position is centre. Other options are:
 `top`, `right top`, `right`, `right bottom`, `bottom`, `left bottom`, `left`, `left top`.
 
 **`background`** – background colour when using a fit of contain, parsed by the [color](https://www.npmjs.org/package/color) module, defaults to black without transparency.
@@ -67,25 +67,9 @@ To allow only preset transformations, you need to set firebase env variables:
     }
     ```
 
-## CORS
-
-To setup CORS limits , you need to edit firebase env variables:
-
--   for deployment: `functions:config:set settings.cors="your cors limits"`
-
--   for local emulator: edit `functions/.runtimeconfig.json` by adding:
-
-    ```json
-    {
-    	"settings": {
-    		"cors": "your cors limits"
-    	}
-    }
-    ```
-
 ## Deployment
 
-To automate deployment, create a `.deploy.sh` file inslide `/functions`  folder, with your deplyment script:
+To automate deployment, create a `.deploy.sh` file inslide `/functions` folder, with your deplyment script:
 
 ```sh
 # if you want to, set deployed env variables here:
@@ -94,17 +78,17 @@ To automate deployment, create a `.deploy.sh` file inslide `/functions`  folder,
 firebase deploy --only functions:lazysharp
 ```
 
-Then run `yarn deploy`
+Then run `yarn deploy` to run your deployment script.
 
 ## Emulator
 
-To launch an emulator, create an `.emulate.sh` file inslide `/functions`  with your emulate script:
+To launch an emulator, create an `.emulate.sh` file inslide `/functions` with your emulate script:
 
 ```sh
 export GOOGLE_APPLICATION_CREDENTIALS=[PATH-TO-CREDENTIALS] && npm run build && firebase emulators:start --only functions
 ```
 
-Then run `yarn emulate`
+Then run `yarn emulate` to run your emulator script.
 
 ## Authentication
 

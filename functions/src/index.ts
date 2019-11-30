@@ -17,31 +17,27 @@ import {
 } from './utils'
 
 const {
-	settings: { presets_only, cors_origin, mode },
+	settings: { presets_only, mode },
 } = functions.config()
 
 const CONFIG: GetSignedUrlConfig = { action: 'read', expires: '01-01-2100' }
 const PRESETS_ONLY = !!presets_only
-const CORS_ORIGIN = (cors_origin && cors_origin.split(',')) || true
 
-const cors = Cors({ origin: CORS_ORIGIN, methods: 'GET' })
+const cors = Cors({ origin: true, methods: 'GET' })
 
 admin.initializeApp()
 
 export const lazysharp = functions
 	.region('europe-west1')
 	.https.onRequest((req, res) => {
-		// process unhandled rejections and log them in dev
-		process.on('unhandledRejection', error =>
-			UnhandledRejections(mode, error, res)
-		)
+		UnhandledRejections(mode, res)
 
 		return cors(req, res, async () => {
 			const query: QueryParams = req.query
 			const preset = getPreset(query)
 
 			// check for required query params
-			if (!req.method) {
+			if (req.method !== 'GET') {
 				return res.status(405).send('method not allowed')
 			}
 			if (!query.bucket) {

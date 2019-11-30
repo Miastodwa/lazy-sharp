@@ -79,14 +79,13 @@ export const buildPipeline = async (
 	}
 }
 
-export const UnhandledRejections = (
-	mode: string,
-	error: object,
-	res: Response
-) => {
-	if (mode !== 'development') {
-		return res.status(500).send('unhandledRejection')
-	}
-	console.error('unhandledRejection', error)
-	return res.status(500).send(error)
+export const UnhandledRejections = (mode: string, res: Response) => {
+	// process unhandled rejections and log them in dev
+	process.on('unhandledRejection', error => {
+		if (mode !== 'development') {
+			return res.status(500).send('unhandledRejection')
+		}
+		console.error('unhandledRejection', error)
+		return res.status(500).send(error)
+	})
 }
