@@ -58,7 +58,7 @@ export const lazysharp = functions
 			const resizeOptions = getResizeOptions(query)
 			const fileParams = getFileParams(query)
 
-			const sufix = generateSufix(resizeOptions)
+			const sufix = generateSufix(resizeOptions, preset && query.preset)
 			const sufixedName = `${name}__${sufix}__.${fileParams.format}`
 
 			const storage = admin.storage()
@@ -118,7 +118,6 @@ export const lazysharp = functions
 			console.log('creating file...')
 			const { format } = fileParams
 			const modifiedMeta: CreateWriteStreamOptions = {
-				public: true,
 				metadata: {
 					contentType: `image/${format}`,
 					cacheControl: fileParams.cacheControl,
