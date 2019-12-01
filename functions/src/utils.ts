@@ -41,7 +41,7 @@ export const getFileParams = (query: QueryParams) => {
 	const fileFormat = getFileFormat(query)
 	return {
 		bucket: query.bucket,
-		ref: query.ref,
+		path: query.path,
 		result: query.result || 'redirect',
 		format: fileFormat,
 		cacheControl: query.cacheControl || CACHE_CONTROL,

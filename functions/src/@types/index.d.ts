@@ -10,7 +10,7 @@ export interface Presets {
 
 export interface QueryParams {
 	bucket?: string
-	ref?: string
+	path?: string
 	result?: 'url' | 'redirect'
 	format?: 'webp' | 'jpeg' | 'png'
 	cacheControl?: string

@@ -18,7 +18,7 @@ Query parameters are used to create arguments for `sharp` transformations and ge
 
 **`bucket`** – name of the bucket
 
-**`ref`** – path to file (e.g. `images/my-image.jpg`)
+**`path`** – path to file (e.g. `images/my-image.jpg`)
 
 `preset` – name of the preset transformation (e.g. `thumbnail`) see: Presets. When set, other transformation params will be ignored.
 

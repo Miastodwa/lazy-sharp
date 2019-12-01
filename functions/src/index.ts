@@ -43,8 +43,8 @@ export const lazysharp = functions
 			if (!query.bucket) {
 				return res.status(422).send('bucket required')
 			}
-			if (!query.ref) {
-				return res.status(422).send('ref required')
+			if (!query.path) {
+				return res.status(422).send('path required')
 			}
 			if (PRESETS_ONLY && !preset) {
 				return res
@@ -52,7 +52,7 @@ export const lazysharp = functions
 					.send(`only preset configurations allowed: ${PRESETS_ONLY}`)
 			}
 
-			const [name, ext] = splitFileName(query.ref)
+			const [name, ext] = splitFileName(query.path)
 			const originalFormat = ext === 'jpg' ? 'jpeg' : ext
 
 			const resizeOptions = getResizeOptions(query)
@@ -63,7 +63,7 @@ export const lazysharp = functions
 
 			const storage = admin.storage()
 			const bucket = storage.bucket(fileParams.bucket)
-			const original = bucket.file(fileParams.ref)
+			const original = bucket.file(fileParams.path)
 			const modified = bucket.file(sufixedName)
 
 			// if no requested transforms, redirect to original.
@@ -111,7 +111,7 @@ export const lazysharp = functions
 			// if neither original or modified exist, return 404
 			const [originalExists] = await original.exists().catch(e => null)
 			if (!originalExists) {
-				return res.status(404).send(`${fileParams.ref} does not exist`)
+				return res.status(404).send(`${fileParams.path} does not exist`)
 			}
 
 			// if modified doesn't exist and original does, create modified, and redirect to it
