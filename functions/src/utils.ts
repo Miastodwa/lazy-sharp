@@ -11,7 +11,13 @@ export const splitFileName = (filename: string) => {
 	return [filename.slice(0, -ext[0].length), ext[1]]
 }
 
-export const generateSufix = (options: sharp.ResizeOptions): string => {
+export const generateSufix = (
+	options?: sharp.ResizeOptions,
+	preset?: string
+): string => {
+	if (preset) {
+		return `preset:${preset}`
+	}
 	return Object.keys(options).reduce((acc, key) => {
 		if (!options[key]) {
 			return acc
@@ -60,7 +66,7 @@ export const getResizeOptions = (query: QueryParams): sharp.ResizeOptions => {
 		fit: query.fit,
 		position: query.position,
 		background: query.background,
-		withoutEnlargement: query.withoutEnlargement,
+		withoutEnlargement: query.withoutEnlargement === 'true',
 	}
 }
 

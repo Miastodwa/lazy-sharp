@@ -1,4 +1,4 @@
-import { ResizeOptions, Sharp } from 'sharp'
+import { ResizeOptions } from 'sharp'
 import { buildPipeline, generateSufix, splitFileName } from '../utils'
 const resizeOptions: ResizeOptions = {
 	width: 300,

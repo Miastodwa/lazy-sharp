@@ -39,7 +39,7 @@ Query parameters are used to create arguments for `sharp` transformations and ge
 
 **`background`** – background colour when using a fit of contain, parsed by the [color](https://www.npmjs.org/package/color) module, defaults to black without transparency.
 
-**`withoutEnlargement`** – do not enlarge if the width or height are already less than the specified dimensions
+**`withoutEnlargement`** – `false` or `true` do not enlarge if the width or height are already less than the specified dimensions. Deafults to `true`.
 
 **`format`** – image output format: `jpeg`, `png`, `webp`
 

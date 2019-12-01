@@ -20,5 +20,5 @@ export interface QueryParams {
 	fit?: ResizeOptions['fit']
 	position?: ResizeOptions['position']
 	background?: string
-	withoutEnlargement?: boolean
+	withoutEnlargement?: 'true' | 'false'
 }
