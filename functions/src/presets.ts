@@ -1,11 +1,10 @@
 import { Presets } from './@types'
 
 const presets: Presets = {
+	default: {},
 	test: {
-		width: 400,
+		width: 300,
 		height: 300,
-		fit: 'contain',
-		background: 'pink',
 		format: 'webp',
 	},
 }

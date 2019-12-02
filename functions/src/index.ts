@@ -1,27 +1,19 @@
-import {
-	CreateWriteStreamOptions,
-	GetSignedUrlConfig,
-} from '@google-cloud/storage'
+import { CreateWriteStreamOptions } from '@google-cloud/storage'
 import * as Cors from 'cors'
 import * as admin from 'firebase-admin'
 import * as functions from 'firebase-functions'
 import { QueryParams } from './@types'
 import {
 	buildPipeline,
+	FbResourceUrl,
 	generateSufix,
 	getFileParams,
 	getPreset,
 	getResizeOptions,
 	splitFileName,
+	successfulResponse,
 	UnhandledRejections,
 } from './utils'
-
-const {
-	settings: { presets_only, mode },
-} = functions.config()
-
-const CONFIG: GetSignedUrlConfig = { action: 'read', expires: '01-01-2100' }
-const PRESETS_ONLY = !!presets_only
 
 const cors = Cors({ origin: true, methods: 'GET' })
 
@@ -30,7 +22,7 @@ admin.initializeApp()
 export const lazysharp = functions
 	.region('europe-west1')
 	.https.onRequest((req, res) => {
-		UnhandledRejections(mode, res)
+		UnhandledRejections(res)
 
 		return cors(req, res, async () => {
 			const query: QueryParams = req.query
@@ -46,11 +38,6 @@ export const lazysharp = functions
 			if (!query.path) {
 				return res.status(422).send('path required')
 			}
-			if (PRESETS_ONLY && !preset) {
-				return res
-					.status(422)
-					.send(`only preset configurations allowed: ${PRESETS_ONLY}`)
-			}
 
 			const [name, ext] = splitFileName(query.path)
 			const originalFormat = ext === 'jpg' ? 'jpeg' : ext
@@ -59,53 +46,26 @@ export const lazysharp = functions
 			const fileParams = getFileParams(query)
 
 			const sufix = generateSufix(resizeOptions, preset && query.preset)
-			const sufixedName = `${name}__${sufix}__.${fileParams.format}`
+			const sufixedName = `${name}${sufix}.${fileParams.format}`
 
 			const storage = admin.storage()
 			const bucket = storage.bucket(fileParams.bucket)
 			const original = bucket.file(fileParams.path)
 			const modified = bucket.file(sufixedName)
+			const originalUrl = FbResourceUrl(bucket.name, original.name)
+			const modifiedUrl = FbResourceUrl(bucket.name, modified.name)
 
 			// if no requested transforms, redirect to original.
 			if (!sufix && originalFormat === fileParams.format) {
-				const [url] = await original
-					.getSignedUrl(CONFIG)
-					.catch(e => [Error(e)])
-
-				if (url instanceof Error) {
-					console.error(url)
-					return res.status(500).send(url.message)
-				}
-
 				console.log('original')
-
-				if (fileParams.result === 'url') {
-					return res.send(url)
-				} else {
-					return res.redirect(301, url)
-				}
+				return successfulResponse(res, fileParams.result, originalUrl)
 			}
 
 			// if modified exists, redirect to it.
-			console.log('checking modified...')
-			const modifiedData = await Promise.all([
-				modified.exists(),
-				modified.getSignedUrl(CONFIG),
-			]).catch(e => Error(e))
-
-			if (modifiedData instanceof Error) {
-				console.log(modifiedData)
-				return res.status(500).send(modifiedData.message)
-			}
-			const [[modifiedExists], [modifiedUrl]] = modifiedData
-
+			const [modifiedExists] = await modified.exists().catch(e => null)
 			if (modifiedExists) {
 				console.log('...modified exists')
-				if (fileParams.result === 'url') {
-					return res.send(modifiedUrl)
-				} else {
-					return res.redirect(301, modifiedUrl)
-				}
+				return successfulResponse(res, fileParams.result, modifiedUrl)
 			}
 
 			// if neither original or modified exist, return 404
@@ -142,13 +102,12 @@ export const lazysharp = functions
 				fileUploadStream.on('finish', resolve).on('error', reject)
 			)
 
-			await promiseUpload
+			const uploadResult = await promiseUpload.catch(e => Error(e))
+			if (uploadResult instanceof Error) {
+				return res.status(500).send(uploadResult.message)
+			}
 
 			console.log('...file created')
-			if (fileParams.result === 'url') {
-				return res.send(modifiedUrl)
-			} else {
-				return res.redirect(301, modifiedUrl)
-			}
+			return successfulResponse(res, fileParams.result, modifiedUrl)
 		})
 	})

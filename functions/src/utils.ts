@@ -1,10 +1,15 @@
-import { Response } from 'firebase-functions'
+import { config, Response } from 'firebase-functions'
 import * as sharp from 'sharp'
 import { Preset, QueryParams } from './@types'
 import presets from './presets'
 
 export const FORMATS = ['jpeg', 'png', 'webp']
 export const CACHE_CONTROL = 'public, max-age=31536000'
+export const FB_STORAGE_URL = 'https://firebasestorage.googleapis.com/v0'
+
+const {
+	settings: { presets_only, mode },
+} = config()
 
 export const splitFileName = (filename: string) => {
 	const ext = /(?:\.([^.]+))?$/.exec(filename)
@@ -16,9 +21,9 @@ export const generateSufix = (
 	preset?: string
 ): string => {
 	if (preset) {
-		return `preset:${preset}`
+		return `__preset:${preset}__`
 	}
-	return Object.keys(options).reduce((acc, key) => {
+	const sufix = Object.keys(options).reduce((acc, key) => {
 		if (!options[key]) {
 			return acc
 		}
@@ -27,10 +32,18 @@ export const generateSufix = (
 		}
 		return `${acc},${key}:${options[key]}`
 	}, '')
+	if (sufix) {
+		return `__${sufix}__`
+	}
+	return ''
 }
 
 export const getPreset = ({ preset }: QueryParams): Preset => {
-	return preset && presets[preset]
+	const selectedPreset = preset && presets[preset]
+	if (!!presets_only) {
+		return selectedPreset || {}
+	}
+	return selectedPreset
 }
 
 export const getFileFormat = (query: QueryParams) => {
@@ -85,7 +98,24 @@ export const buildPipeline = async (
 	}
 }
 
-export const UnhandledRejections = (mode: string, res: Response) => {
+export const FbResourceUrl = (bucket: string, path: string) => {
+	const ecodedPath = encodeURIComponent(path)
+	return `${FB_STORAGE_URL}/b/${bucket}/o/${ecodedPath}`
+}
+
+export const successfulResponse = (
+	res: Response,
+	result: QueryParams['result'],
+	url: string
+) => {
+	if (result === 'url') {
+		return res.send(url)
+	} else {
+		return res.redirect(301, `${url}?alt=media`)
+	}
+}
+
+export const UnhandledRejections = (res: Response) => {
 	// process unhandled rejections and log them in dev
 	process.on('unhandledRejection', error => {
 		if (mode !== 'development') {
