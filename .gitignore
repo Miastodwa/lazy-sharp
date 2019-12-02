@@ -9,3 +9,4 @@ functions/.deploy.sh
 cloud-functions-emulator.log
 yarn-error.log
 service_account.json
+.firebaserc

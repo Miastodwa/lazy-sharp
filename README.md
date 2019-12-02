@@ -35,7 +35,7 @@ Query parameters are used to create arguments for `sharp` transformations and ge
 -   `outside`: Preserving aspect ratio, resize the image to be as small as possible while ensuring its dimensions are greater than or equal to both those specified.
 
 **`position`** – when using a **fit** of `cover` or `contain`, the default position is centre. Other options are:
-`top`, `right top`, `right`, `right bottom`, `bottom`, `left bottom`, `left`, `left top`.
+`top`, `right top`, `right`, `right bottom`, `bottom`, `left bottom`, `left`, `left top` or a number.
 
 **`background`** – background colour when using a fit of contain, parsed by the [color](https://www.npmjs.org/package/color) module, defaults to black without transparency.
 
