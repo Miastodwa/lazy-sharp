@@ -99,8 +99,8 @@ export const buildPipeline = async (
 }
 
 export const FbResourceUrl = (bucket: string, path: string) => {
-	const ecodedPath = encodeURIComponent(path)
-	return `${FB_STORAGE_URL}/b/${bucket}/o/${ecodedPath}`
+	const encodedPath = encodeURIComponent(path)
+	return `${FB_STORAGE_URL}/b/${bucket}/o/${encodedPath}`
 }
 
 export const successfulResponse = (
