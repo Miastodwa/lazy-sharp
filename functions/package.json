@@ -13,6 +13,7 @@
 		"test:cov": "yarn test --collectCoverage",
 		"serve:cov": "http-server ./coverage/lcov-report/",
 		"deploy": "./.deploy.sh",
+		"deploy:rules": "firebase deploy --only storage",
 		"logs": "firebase functions:log"
 	},
 	"main": "lib/index.js",
