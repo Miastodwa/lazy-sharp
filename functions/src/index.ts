@@ -12,7 +12,7 @@ import {
 	getResizeOptions,
 	splitFileName,
 	successfulResponse,
-	UnhandledRejections,
+	unhandledRejections,
 } from './utils'
 
 const cors = Cors({ origin: true, methods: 'GET' })
@@ -22,11 +22,10 @@ admin.initializeApp()
 export const lazysharp = functions
 	.region('europe-west1')
 	.https.onRequest((req, res) => {
-		UnhandledRejections(res)
+		unhandledRejections(res)
 
 		return cors(req, res, async () => {
 			const query: QueryParams = req.query
-			const preset = getPreset(query)
 
 			// check for required query params
 			if (req.method !== 'GET') {
@@ -45,7 +44,7 @@ export const lazysharp = functions
 			const resizeOptions = getResizeOptions(query)
 			const fileParams = getFileParams(query)
 
-			const sufix = generateSufix(resizeOptions, preset && query.preset)
+			const sufix = generateSufix(resizeOptions, query.preset)
 			const sufixedName = `${name}${sufix}.${fileParams.format}`
 
 			const storage = admin.storage()

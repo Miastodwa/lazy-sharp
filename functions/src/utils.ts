@@ -20,7 +20,8 @@ export const generateSufix = (
 	options?: sharp.ResizeOptions,
 	preset?: string
 ): string => {
-	if (preset) {
+	const presetConfig = getPreset(preset)
+	if (preset && presetConfig) {
 		return `__preset:${preset}__`
 	}
 	const sufix = Object.keys(options).reduce((acc, key) => {
@@ -38,7 +39,7 @@ export const generateSufix = (
 	return ''
 }
 
-export const getPreset = ({ preset }: QueryParams): Preset => {
+export const getPreset = (preset: string): Preset => {
 	const selectedPreset = preset && presets[preset]
 	if (!!presets_only) {
 		return selectedPreset || {}
@@ -46,12 +47,16 @@ export const getPreset = ({ preset }: QueryParams): Preset => {
 	return selectedPreset
 }
 
-export const getFileFormat = (query: QueryParams) => {
-	const preset = getPreset(query)
-	if (preset && preset.format && FORMATS.includes(preset.format)) {
-		return preset.format
-	} else if (FORMATS.includes(query.format)) {
-		return query.format
+export const getFileFormat = ({ preset, format }: QueryParams) => {
+	const presetConfig = getPreset(preset)
+	if (
+		presetConfig &&
+		presetConfig.format &&
+		FORMATS.includes(presetConfig.format)
+	) {
+		return presetConfig.format
+	} else if (FORMATS.includes(format)) {
+		return format
 	}
 	return 'jpeg'
 }
@@ -68,10 +73,10 @@ export const getFileParams = (query: QueryParams) => {
 }
 
 export const getResizeOptions = (query: QueryParams): sharp.ResizeOptions => {
-	const presetOptions = getPreset(query)
-	if (presetOptions) {
-		delete presetOptions.format
-		return presetOptions
+	const presetConfig = getPreset(query.preset)
+	if (presetConfig) {
+		delete presetConfig.format
+		return presetConfig
 	}
 	return {
 		width: +query.width || null,
@@ -115,7 +120,7 @@ export const successfulResponse = (
 	}
 }
 
-export const UnhandledRejections = (res: Response) => {
+export const unhandledRejections = (res: Response) => {
 	// process unhandled rejections and log them in dev
 	process.on('unhandledRejection', error => {
 		if (mode !== 'development') {
