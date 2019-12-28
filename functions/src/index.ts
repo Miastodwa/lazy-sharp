@@ -8,14 +8,15 @@ import {
 	FbResourceUrl,
 	generateSufix,
 	getFileParams,
-	getPreset,
 	getResizeOptions,
 	splitFileName,
 	successfulResponse,
 	unhandledRejections,
 } from './utils'
+const { allow_origin }: { allow_origin: string } = functions.config().settings
+const whitelist = allow_origin.split(',')
 
-const cors = Cors({ origin: true, methods: 'GET' })
+const cors = Cors({ origin: whitelist, methods: 'GET' })
 
 admin.initializeApp()
 

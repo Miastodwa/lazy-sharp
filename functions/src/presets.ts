@@ -2,9 +2,14 @@ import { Presets } from './@types'
 
 const presets: Presets = {
 	default: {},
-	test: {
-		width: 300,
-		height: 300,
+	map_preview: {
+		width: 160,
+		height: 104,
+		format: 'webp',
+	},
+	profile_roll: {
+		width: 240,
+		height: 160,
 		format: 'webp',
 	},
 }

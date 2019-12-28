@@ -19,7 +19,7 @@ test('split file name', () => {
 test('create a suffix', () => {
 	const suffix = generateSufix(resizeOptions)
 	const suffixExpected =
-		'width:300,fit:contain,position:top,background:pink,withoutEnlargement:true'
+		'__width:300,fit:contain,position:top,background:pink,withoutEnlargement:true__'
 	expect(suffix).toBe(suffixExpected)
 })
 
